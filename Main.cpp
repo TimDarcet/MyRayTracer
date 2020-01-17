@@ -1,9 +1,9 @@
 #include <iostream>
-#include "Image.h"
 #include <cstring>
 #include <ctime>
 
-
+#include "Image.h"
+#include "Scene.h"
 
 int main(int argc, char **argv) {
     int width = 300;
