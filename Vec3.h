@@ -15,10 +15,13 @@
 #include <iostream>
 
 /// Vector in 3 dimensions, with basics operators overloaded.
+
 template <typename T>
 class Vec3 {
 public:
-  inline Vec3 ()  { m_p[0] = m_p[1] = m_p[2] = T (0.0); }
+  inline Vec3 () {
+    m_p[0] = m_p[1] = m_p[2] = T (0.0);
+  }
 
   inline Vec3 (T p0, T p1, T p2) {
     m_p[0] = p0;
@@ -227,7 +230,7 @@ inline T length (const Vec3<T> & a) {
   return a.length ();
 }
 
-  template <class T>
+template <class T>
 inline T dist (const Vec3<T> & a, const Vec3<T> & b) {
   return (a-b).length ();
 }
@@ -259,7 +262,7 @@ inline Vec3<T> mix (const Vec3<T> & u, const Vec3<T> & v, float alpha) {
 }
 
 /**
- * Cartesion to polar coordinates conversion.
+ * Cartesian to polar coordinates conversion.
  * Result:
  * [0] = length
  * [1] = angle with z-axis
