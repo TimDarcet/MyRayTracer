@@ -5,10 +5,11 @@
 
 #include "Image.h"
 #include "Scene.h"
+#include "Transform.h"
 
 int main(int argc, char **argv) {
-    int width = 450;
-    int height = 300;
+    int width = 150;
+    int height = 100;
     char *output = (char *)"out.ppm";
     // Parse arguments
     for (int i = 1; i < argc - 1; i++) {
@@ -27,20 +28,21 @@ int main(int argc, char **argv) {
     cout << "Filled bg" << endl;
     // Create scene
     Scene test_scene;
-    test_scene.set_camera(Camera({0, 0, 2}, {0, -M_PI/2, 0}, M_PI/4, 1.5));
+    test_scene.m_cam = Camera({0, 0, 2}, {0, -M_PI/2, 0}, M_PI/4, 1.5);
     cout << "Created scene" << endl;
     Mesh test_mesh;
-    Vertex v0 = {0, 0, -1};
-    Vertex v1 = {1, 0, -1};
-    Vertex v2 = {0, 1, -1};
-    test_mesh.add_vertex(v0);
-    test_mesh.add_vertex(v1);
-    test_mesh.add_vertex(v2);
-    test_mesh.add_triangle(Triangle(&v0, &v1, &v2));
+    // Vertex v0 = {0, 0, -1};
+    // Vertex v1 = {1, 0, -1};
+    // Vertex v2 = {0, 1, -1};
+    // test_mesh.m_vertices.push_back(v0);
+    // test_mesh.m_vertices.push_back(v1);
+    // test_mesh.m_vertices.push_back(v2);
+    // test_mesh.m_triangles.push_back(Triangle(&test_mesh.m_vertices[0], &test_mesh.m_vertices[1], &test_mesh.m_vertices[2]));
+    test_mesh.loadOFF("../example.off");
+    Transform t({0,0,0}, {1.5, 0, 0}, 1);
+    t.apply_transform(test_mesh);
     test_mesh.compute_normals();
-    cout << &v0 << endl;
-    // test_mesh.loadOFF("../example.off");
-    test_scene.add_mesh(test_mesh);
+    test_scene.m_meshes.push_back(test_mesh);
     // Raytrace
     test_scene.rayTrace(imtest);
     cout << "Traced rays" << endl;

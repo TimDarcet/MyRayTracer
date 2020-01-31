@@ -12,18 +12,17 @@ using namespace std;
 
 class Scene {
     public:
+        vector<Mesh> m_meshes;
+        Camera m_cam;
+
         Scene() {
             m_meshes = vector<Mesh>();
             m_cam = Camera();
         }
     
-    inline void add_mesh(Mesh m) {
-        m_meshes.push_back(m);
-    }
-
-    inline void set_camera(Camera cam) {
-        m_cam = cam;
-    }
+    // inline void add_mesh(Mesh m) {
+    //     m_meshes.push_back(m);
+    // }
 
     void rayTrace(Image &im) {
         for (int i = 0; i < im.m_width; i++) {
@@ -33,10 +32,13 @@ class Scene {
                     for (Triangle t : m.m_triangles) {
                         vector<float> intersection = rij.intersect(t);
                         if (intersection.size() > 0) {
-                            // cout << intersection[0] << intersection[1] << intersection[2] << intersection[3] << endl; 
-                            Vec3f normal_at_point = intersection[0] * t.get_v(0).get_normal()
-                                                  + intersection[1] * t.get_v(1).get_normal()
-                                                  + intersection[2] * t.get_v(2).get_normal();
+                            Vec3f normal_at_point = intersection[0] * t.m_vertices[0]->m_normal
+                                                  + intersection[1] * t.m_vertices[1]->m_normal
+                                                  + intersection[2] * t.m_vertices[2]->m_normal;
+                            normal_at_point = {abs(normal_at_point[0]),
+                                               abs(normal_at_point[1]),
+                                               abs(normal_at_point[2])};
+                            normal_at_point.normalize();
                             im.m_data[j * im.m_width + i] = normal_at_point;
                             break;
                         }
@@ -45,8 +47,4 @@ class Scene {
             }
         }
     }
-
-    protected:
-        vector<Mesh> m_meshes;
-        Camera m_cam;
 };

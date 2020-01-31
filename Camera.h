@@ -20,7 +20,9 @@ class Camera {
         }
 
         Vec3f direction_vec() {
-            return m_orientation.apply_rotations({1, 0, 0});            
+            Vec3f r = {1, 0, 0};
+            m_orientation.apply_rotations(r);            
+            return r;
         }
 
         /*
@@ -32,7 +34,7 @@ class Camera {
             up_left.normalize();
             Vec3f dir = up_left * Vec3f(1, 1-2*x, 1-2*y);
             // Rotate to canonical reference frame
-            dir = m_orientation.apply_rotations(dir);
+            m_orientation.apply_rotations(dir);
             return dir;
         }
 

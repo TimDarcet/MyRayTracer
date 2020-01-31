@@ -16,9 +16,9 @@ class Ray {
 
         vector<float> intersect(Triangle t) {
             // Point vectors
-            Vec3f p0 = t.get_v(0).get_p();
-            Vec3f p1 = t.get_v(1).get_p();
-            Vec3f p2 = t.get_v(2).get_p();
+            Vec3f p0 = t.m_vertices[0]->m_point;
+            Vec3f p1 = t.m_vertices[1]->m_point;
+            Vec3f p2 = t.m_vertices[2]->m_point;
             // Edges
             Vec3f e0 = p1 - p0;
             Vec3f e1 = p2 - p0;
