@@ -7,6 +7,7 @@
 #include "Ray.h"
 #include "Triangle.h"
 #include "Mesh.h"
+#include "LightSource.h"
 
 using namespace std;
 
@@ -14,10 +15,12 @@ class Scene {
     public:
         vector<Mesh> m_meshes;
         Camera m_cam;
+        LightSource m_light;
 
         Scene() {
             m_meshes = vector<Mesh>();
             m_cam = Camera();
+            m_light = LightSource();
         }
     
     // inline void add_mesh(Mesh m) {
@@ -35,13 +38,17 @@ class Scene {
                             Vec3f normal_at_point = intersection[0] * t.m_vertices[0]->m_normal
                                                   + intersection[1] * t.m_vertices[1]->m_normal
                                                   + intersection[2] * t.m_vertices[2]->m_normal;
-                            normal_at_point = {abs(normal_at_point[0]),
-                                               abs(normal_at_point[1]),
-                                               abs(normal_at_point[2])};
                             normal_at_point.normalize();
-                            im.m_data[j * im.m_width + i] = normal_at_point;
+                            Vec3f intersection_position = intersection[0] * t.m_vertices[0]->m_point
+                                                        + intersection[1] * t.m_vertices[1]->m_point
+                                                        + intersection[2] * t.m_vertices[2]->m_point;
+                            Vec3f color = m.m_material.evaluateColorResponse(normal_at_point,
+                                                                             -rij.m_direction,
+                                                                             m_light.m_position - intersection_position);
+                            im.m_data[j * im.m_width + i] = color;
                             break;
                         }
+                        // TODO: Check if the triangle was not masked by another
                     }
                 }
             }

@@ -9,6 +9,9 @@ using namespace std;
 
 class Ray {
     public:
+        Vec3f m_start;
+        Vec3f m_direction;
+
         Ray(Vec3f s={0.0f, 0.0f, 0.0f}, Vec3f d={1.0f, 0.0f, 0.0f}) {
             m_start = s;
             m_direction = d;
@@ -46,8 +49,4 @@ class Ray {
                 return vector<float>();
             return {b0, b1, b2, t0};
         }
-
-    protected:
-        Vec3f m_start;
-        Vec3f m_direction;
 };
