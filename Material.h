@@ -22,7 +22,6 @@ class Material {
         Vec3f evaluateColorResponse (const Vec3f &normal, const Vec3f &wi, const Vec3f wo) const {
             Vec3f wh = normalize((normalize(wo) + normalize(wi)) / 2);
             float d = dot(wh, normalize(normal));
-            cout << normal << " " << wi << " " << wo << " " << wh << " " << d << endl;
             return m_albedo * (m_diffuse_coef / M_PI + m_specular_coef * pow(d, m_shininess));
         }
 };
