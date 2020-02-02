@@ -6,6 +6,7 @@
 #include "Vec3.h"
 #include "Vertex.h"
 #include "Triangle.h"
+#include "Material.h"
 
 using namespace std;
 
@@ -14,11 +15,13 @@ class Mesh {
         vector<Vertex> m_vertices;
         vector<Triangle> m_triangles;
         vector<Vec3f> m_normals;
+        Material m_material;
 
         Mesh() {
             m_vertices = vector<Vertex>();
             m_triangles = vector<Triangle>();
             m_normals = vector<Vec3f>();
+            m_material = Material();
         }
 
         /*
