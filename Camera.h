@@ -12,6 +12,8 @@ using namespace std;
 
 class Camera {
     public:
+        Vec3f m_position;
+
         Camera(Vec3f position = {0, 0, 0}, Orientation orientation = {0, 0, 0}, float fov = M_PI / 4, float aspect_ratio = 1.5f) {
             m_position = position;
             m_orientation = orientation; // 3 floats: yaw-pitch-roll angles 
@@ -35,15 +37,18 @@ class Camera {
             Vec3f dir = up_left * Vec3f(1, 1-2*x, 1-2*y);
             // Rotate to canonical reference frame
             m_orientation.apply_rotations(dir);
+            dir.normalize();
             return dir;
         }
 
+        /*
+         * x and y are floats between 0 and 1 representing coordinates in the image
+         */
         Ray launch_ray(float x, float y) {
             return Ray(m_position, pixel_direction(x, y));
         }
 
     protected:
-        Vec3f m_position;
         Orientation m_orientation;
         float m_fov;
         float m_aspect_ratio;

@@ -14,13 +14,11 @@ class Mesh {
     public:
         vector<Vertex> m_vertices;
         vector<Triangle> m_triangles;
-        vector<Vec3f> m_normals;
         Material m_material;
 
         Mesh() {
             m_vertices = vector<Vertex>();
             m_triangles = vector<Triangle>();
-            m_normals = vector<Vec3f>();
             m_material = Material();
         }
 
@@ -80,12 +78,4 @@ class Mesh {
                 v.m_normal.normalize();
             }
         }
-
-        // inline void add_vertex(Vertex v) {
-        //     m_vertices.push_back(v);
-        // }
-
-        // inline void add_triangle(Triangle t) {
-        //     m_triangles.push_back(t);
-        // }
 };

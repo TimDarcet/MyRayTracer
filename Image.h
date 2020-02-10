@@ -11,7 +11,7 @@ using namespace std;
 class Image {
     public:
         int m_width, m_height;
-        vector<Vec3f> m_data;
+        vector<Vec3f> m_data; // Values between 0 and 1
         
         Image() {
             m_width = 0;
@@ -34,7 +34,10 @@ class Image {
             for (int y = 0; y < m_height; y++) {
                 for (int x = 0; x < m_width; x++) {
                     Vec3f pxl = m_data.at(y * m_width + x);
-                    outfile << (int)(max_color * pxl[0]) << " " << (int)(max_color * pxl[1]) << " " << (int)(max_color * pxl[2]) << " ";
+                    int r = (int)(max_color * max(0.0f, min(1.0f, pxl[0])));
+                    int g = (int)(max_color * max(0.0f, min(1.0f, pxl[1])));
+                    int b = (int)(max_color * max(0.0f, min(1.0f, pxl[2])));
+                    outfile << r << " " << g << " " << b << " ";
                 }
                 outfile << endl;
             }
