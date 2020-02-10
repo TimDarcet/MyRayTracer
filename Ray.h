@@ -15,6 +15,7 @@ class Ray {
         Ray(Vec3f s={0.0f, 0.0f, 0.0f}, Vec3f d={1.0f, 0.0f, 0.0f}) {
             m_start = s;
             m_direction = d;
+            m_direction.normalize();
         }
 
         vector<float> intersect(Triangle t) {
@@ -32,21 +33,23 @@ class Ray {
             Vec3f q = cross(m_direction, e1);
             float a = dot(e0, q);
             // If is going the wrong way, is parallel to the triangle or if the triangle is degenerate, abort
-            if (dot(n, m_direction) >= 0 || abs(a) < __FLT_EPSILON__)
+            if (dot(n, m_direction) >= 0 || fabs(a) < __FLT_EPSILON__)
                 return vector<float>();
             // More helper vars
-            Vec3f s = (m_start - p0) / a;
+            Vec3f s = (1 / a) * (m_start - p0);
             Vec3f r = cross(s, e0);
             // Calculate barycentric coordinates
             float b0 = dot(s, q);
             float b1 = dot(r, m_direction);
-            float b2 = 1 - b0 - b1;
+            float w = 1 - b0 - b1;
             // Check the intersection is in the triangle
-            if (b0 < 0 || b1 < 0 || b2 < 0)
+            if (b0 < 0 || b1 < 0 || w < 0)
                 return vector<float>();
+            // Calculate distance
             float t0 = dot(e1, r);
-            if (t0 < 0)
+            if (t0 <= 0)
                 return vector<float>();
-            return {b0, b1, b2, t0};
+            // Return
+            return {w, b0, b1, t0};
         }
 };
