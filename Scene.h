@@ -71,8 +71,8 @@ class Scene {
                                                 if (is_visible(intersection_position + 2 * __FLT_EPSILON__ * normal_at_point, light.m_position)) {
                                                     color = light.m_intensity * light.m_color * dot(normal_at_point, -rij.m_direction);
                                                     color *= m.m_material.evaluateColorResponse(normal_at_point,
-                                                                                                -rij.m_direction,
-                                                                                                light.m_position - intersection_position);
+                                                                                                light.m_position - intersection_position,
+                                                                                                -rij.m_direction);
                                                 }
                                                 else {
                                                     color = {0, 0, 0};
@@ -83,8 +83,8 @@ class Scene {
                                                 if (is_visible(intersection_position + 2 * __FLT_EPSILON__ * normal_at_point, random_source)) {
                                                     color = light.m_intensity * light.m_color * dot(normal_at_point, -rij.m_direction);
                                                     color *= m.m_material.evaluateColorResponse(normal_at_point,
-                                                                                                -rij.m_direction,
-                                                                                                random_source - intersection_position);
+                                                                                                random_source - intersection_position,
+                                                                                                -rij.m_direction);
                                                 }
                                                 else {
                                                     color = {0, 0, 0};

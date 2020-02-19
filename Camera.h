@@ -14,7 +14,7 @@ class Camera {
     public:
         Vec3f m_position;
 
-        Camera(Vec3f position = {0, 0, 0}, Orientation orientation = {0, 0, 0}, float fov = M_PI / 4, float aspect_ratio = 1.5f) {
+        Camera(Vec3f position = {0, 0, 0}, Orientation orientation = {0, 0, 0}, float fov = M_PI / 4, float aspect_ratio = 1.0f) {
             m_position = position;
             m_orientation = orientation; // 3 floats: yaw-pitch-roll angles 
             m_fov = fov;

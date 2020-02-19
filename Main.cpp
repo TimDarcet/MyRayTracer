@@ -9,8 +9,8 @@
 #include "LightSource.h"
 
 int main(int argc, char **argv) {
-    int width = 45;
-    int height = 30;
+    int width = 100;
+    int height = 150;
     int n_samples = 4;
     char *output = (char *)"out.ppm";
     // Parse arguments
@@ -31,14 +31,14 @@ int main(int argc, char **argv) {
     // Create scene
     Scene test_scene;
     test_scene.m_n_samples = n_samples;
-    test_scene.m_cam = Camera({0, 0, 2}, {0, -M_PI/2, 0}, M_PI/4, 1.5);
+    test_scene.m_cam = Camera({0, 0, 2}, {0, -M_PI/2, 0}, M_PI/4, 0.6666f);
     cout << "Created scene" << endl;
     // Create ground
     Mesh ground;
-    Vertex v0 = {-1, -3, -3};
-    Vertex v1 = {-1, -3, 3};
-    Vertex v2 = {-1, 3, -3};
-    Vertex v3 = {-1, 3, 3};
+    Vertex v0 = {-0.3, -3, -3};
+    Vertex v1 = {-0.3, -3, 3};
+    Vertex v2 = {-0.3, 3, -3};
+    Vertex v3 = {-0.3, 3, 3};
     ground.m_vertices.push_back(v0);
     ground.m_vertices.push_back(v1);
     ground.m_vertices.push_back(v2);
@@ -57,13 +57,14 @@ int main(int argc, char **argv) {
     Transform t({0,0,0}, {1.5, 3, 3}, 1);
     t.apply_transform(test_mesh);
     test_mesh.compute_normals();
+    test_mesh.m_material.m_type = M_MICROFACETS;
     test_scene.m_meshes.push_back(test_mesh);
     test_mesh.m_material.m_shininess = 50;
     cout << "Imported model" << endl;
     // Create light
-    LightSource point_light = LightSource({2,2,2}, {0.7,1.0,0.9}, 1, L_RECTANGLE);
+    LightSource point_light = LightSource({2,2,2}, {0.7,1.0,0.9}, 4, L_RECTANGLE);
     test_scene.m_lights.push_back(point_light);
-    LightSource ambient_light = LightSource({0,0,0}, {1,1,1}, 1, L_AMBIENT);
+    LightSource ambient_light = LightSource({0,0,0}, {1,1,1}, 2, L_AMBIENT);
     test_scene.m_lights.push_back(ambient_light);
     cout << "Created light source" << endl;
     // Raytrace
