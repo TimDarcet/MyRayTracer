@@ -9,9 +9,9 @@
 #include "LightSource.h"
 
 int main(int argc, char **argv) {
-    int width = 450;
-    int height = 300;
-    int n_samples = 9;
+    int width = 45;
+    int height = 30;
+    int n_samples = 4;
     char *output = (char *)"out.ppm";
     // Parse arguments
     for (int i = 1; i < argc - 1; i++) {
