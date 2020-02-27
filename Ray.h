@@ -18,7 +18,7 @@ class Ray {
             m_direction.normalize();
         }
 
-        vector<float> intersect(Triangle t) {
+        vector<float> intersect(const Triangle &t) {
             // Point vectors
             Vec3f p0 = t.m_vertices[0]->m_point;
             Vec3f p1 = t.m_vertices[1]->m_point;

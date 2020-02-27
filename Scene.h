@@ -38,8 +38,8 @@ class Scene {
                 for (int i=0; i<progress; i++) {
                     progressBar += "\u2588";
                 }
-                cout << "Raytracing... [" << progressBar << string(50 - progress, ' ') << "] " << progress * 2 << "%\r" << flush;
-                // cout << "Raytraced " << i+1 << "/" << im.m_width << "\r" << flush;
+                std::cout << "Raytracing... [" << progressBar << string(50 - progress, ' ') << "] " << progress * 2 << "%\r" << flush;
+                // std::cout << "Raytraced " << i+1 << "/" << im.m_width << "\r" << flush;
                 for (int j = 0; j < im.m_height; j++) {
                     im.m_data[j * im.m_width + i] = {0, 0, 0};
                     for (int sample_idx = 0; sample_idx < m_n_samples; sample_idx++) {
@@ -54,15 +54,15 @@ class Scene {
                         Vec3f this_ray_color = {0, 0, 0};
                         for (Mesh const m : m_meshes) {
                             Vec3f entry, exit;
-                            if (true || m.m_aabb.ray_intersection(rij, entry, exit)) {
+                            if (m.m_aabb.ray_intersection(rij, entry, exit)) {
                                 for (Triangle t : m.m_triangles) {
                                     vector<float> intersection = rij.intersect(t);
                                     if (intersection.size() > 0) {
                                         if (nearest_intersection.size() == 0 || nearest_intersection[3] > intersection[3]) {
                                             nearest_intersection = intersection;
                                             Vec3f normal_at_point = intersection[0] * t.m_vertices[0]->m_normal
-                                                                + intersection[1] * t.m_vertices[1]->m_normal
-                                                                + intersection[2] * t.m_vertices[2]->m_normal;
+                                                                  + intersection[1] * t.m_vertices[1]->m_normal
+                                                                  + intersection[2] * t.m_vertices[2]->m_normal;
                                             normal_at_point.normalize();
                                             Vec3f intersection_position = intersection[0] * t.m_vertices[0]->m_point
                                                                         + intersection[1] * t.m_vertices[1]->m_point
@@ -78,7 +78,7 @@ class Scene {
                                                     color *= m.m_material.diffuse_response(intersection_position);
                                                     break;
                                                 case L_POINT:
-                                                    if (is_visible(intersection_position + 2 * __FLT_EPSILON__ * normal_at_point, light.m_position)) {
+                                                    if (is_visible(intersection_position + 2 * __FLT_EPSILON__ * t.normal(), light.m_position)) {
                                                         color = light.m_intensity * light.m_color * max(0.0f, dot(normal_at_point, -rij.m_direction));
                                                         color *= m.m_material.evaluateColorResponse(normal_at_point,
                                                                                                     light.m_position - intersection_position,
@@ -91,7 +91,7 @@ class Scene {
                                                     break;
                                                 case L_RECTANGLE:
                                                     random_source = light.m_position + float(dis(gen)) * light.m_vec1 + float(dis(gen)) * light.m_vec2;
-                                                    if (is_visible(intersection_position + 2 * __FLT_EPSILON__ * normal_at_point, random_source)) {
+                                                    if (is_visible(intersection_position + 2 * __FLT_EPSILON__ * t.normal(), random_source)) {
                                                         color = light.m_intensity * light.m_color * max(0.0f, dot(normal_at_point, -rij.m_direction));
                                                         color *= m.m_material.evaluateColorResponse(normal_at_point,
                                                                                                     random_source - intersection_position,

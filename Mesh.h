@@ -32,12 +32,12 @@ class Mesh {
             ifstream offstream;
             offstream.open(fname);
             if (!offstream.is_open()) {
-                cout << "grmbl" << endl;
+                std::cout << "grmbl" << endl;
             }
             string line;
             offstream >> line;
             if (line.compare("OFF") != 0) {
-                cout << "c mor 1" << endl;
+                std::cout << "c mor 1" << endl;
                 return;
             }
             int nv, nf, ne;
@@ -53,7 +53,7 @@ class Mesh {
                 int d;
                 offstream >> d;
                 if (d != 3) {
-                    cout << "c mor" << endl;
+                    std::cout << "c mor" << endl;
                     return; // Can't handle that
                 }
                 int a, b, c;

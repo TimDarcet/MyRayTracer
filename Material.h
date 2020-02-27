@@ -11,24 +11,20 @@
 using namespace std;
 
 class Material {
-    private:
+    public:
         Vec3f m_albedo;
         float m_shininess; // For Blinn-Phong model
         float m_alpha; // For microfacets model (in the normal distribution)
         Vec3f m_F0; // Fresnel reflectance, for microfacets model (in the Fresnel term)
-
-    public:
         int m_type;
         float m_diffuse_coef;
-        float m_specular_coef;
         Worley m_noise;
 
         Material(Vec3f albedo={1,0.7,0.8},
                  int type=M_BLINN_PHONG,
                  float diffuse_coef=0.5,
-                 float specular_coef=0.5,
                  float s=50,
-                 float alpha=0.0,
+                 float alpha=0.5,
                  Vec3f F0={0.5, 0.5, 0.5},
                  int worley_n=10,
                  Vec3f worley_pos={0,0,0},
@@ -36,7 +32,6 @@ class Material {
             m_type = type;
             m_albedo = albedo;
             m_diffuse_coef = diffuse_coef;
-            m_specular_coef = specular_coef;
             m_shininess = s;
             m_alpha = alpha;
             m_F0 = F0;
@@ -48,29 +43,33 @@ class Material {
             // albedo.from_hsv({m_noise.sample(pos, 1) * 360.0f, 0.5, 0.5});
             // return albedo.m_rgb;5
             // return {0, 0, 0};
-            return m_albedo * (1 + 0.5 * (m_noise.sample(pos, 1) - 1) / 2);
+            // return m_albedo * (1 + 0.0 * (m_noise.sample(pos, 1) - 1) / 2);
+            return m_albedo;
         }
 
         float get_shininess(Vec3f pos) const {
-            return m_shininess * (1 + 0.5 * (m_noise.sample(pos, 2) - 1) / 2);
+            // return m_shininess * (1 + 0.0 * (m_noise.sample(pos, 2) - 1) / 2);
+            return m_shininess;
         }
 
         float get_alpha(Vec3f pos) const {
-            return m_alpha * (1 + 0.5 * (m_noise.sample(pos, 1) - 1) / 2);
+            // return m_alpha * (1 + 0.0 * (m_noise.sample(pos, 1) - 1) / 2);
+            return m_alpha;
         }
 
         Vec3f get_F0(Vec3f pos) const {
-            return m_F0 * (1 + 0. * (m_noise.sample(pos, 2) - 1) / 2);
+            // return m_F0 * (1 + 0.0 * (m_noise.sample(pos, 2) - 1) / 2);
+            return m_F0;
         }
 
         Vec3f evaluateColorResponse(const Vec3f normal, const Vec3f wi, const Vec3f wo, Vec3f pos) const {
-            float n = m_noise.sample(pos, 1) * 2;
-            return diffuse_response(pos) + specular_response(normalize(normal), normalize(wi), normalize(wo), pos);
+            // float n = m_noise.sample(pos, 1) * 2;
+            return m_diffuse_coef * diffuse_response(pos) + (1 - m_diffuse_coef) * specular_response(normalize(normal), normalize(wi), normalize(wo), pos);
         }
 
         Vec3f diffuse_response(Vec3f pos) const {
             // Lambert model
-            return this->get_albedo(pos) * m_diffuse_coef / M_PI;
+            return this->get_albedo(pos) / M_PI;
         }
 
         Vec3f specular_response(const Vec3f normal, const Vec3f wi, const Vec3f wo, Vec3f pos) const {
@@ -79,7 +78,7 @@ class Material {
                     return this->get_albedo(pos) * evaluateBlinnPhong(normal, wi, wo, pos);
                     break;
                 case M_MICROFACETS:
-                    return this->get_albedo(pos) * evaluateMicrofacets(normal, wi, wo, pos); // TODO: should I put the albedo as a factor here or not?
+                    return evaluateMicrofacets(normal, wi, wo, pos); // TODO: should I put the albedo as a factor here or not?
                     break;
                 default:
                     return {0, 0, 0};
@@ -90,7 +89,7 @@ class Material {
         Vec3f evaluateBlinnPhong(const Vec3f normal, const Vec3f wi, const Vec3f wo, Vec3f pos) const {
             Vec3f wh = normalize((normalize(wo) + normalize(wi)) / 2);
             float d = dot(wh, normalize(normal));
-            float r = m_specular_coef * pow(d, this->get_shininess(pos));
+            float r = pow(d, this->get_shininess(pos));
             return {r, r, r};
         }
 
