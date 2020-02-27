@@ -28,6 +28,7 @@ class Transform {
             for (Vertex &v : m.m_vertices) {
                 this->apply_transform(v.m_point);
             }
+            m.compute_aabb();
         }
 
     protected:

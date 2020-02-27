@@ -7,6 +7,7 @@
 #include "Vertex.h"
 #include "Triangle.h"
 #include "Material.h"
+#include "AABB.h"
 
 using namespace std;
 
@@ -15,11 +16,13 @@ class Mesh {
         vector<Vertex> m_vertices;
         vector<Triangle> m_triangles;
         Material m_material;
+        AABB m_aabb;
 
         Mesh() {
             m_vertices = vector<Vertex>();
             m_triangles = vector<Triangle>();
             m_material = Material();
+            m_aabb = AABB();
         }
 
         /*
@@ -76,6 +79,15 @@ class Mesh {
             }
             for (Vertex v : m_vertices) {
                 v.m_normal.normalize();
+            }
+        }
+
+        void compute_aabb() {
+            for (Vertex v: m_vertices) {
+                for (int i=0; i<3; i++) {
+                    m_aabb.m_p1[i] = min(m_aabb.m_p1[i], v.m_point[i] - __FLT_EPSILON__ * 10);
+                    m_aabb.m_p2[i] = max(m_aabb.m_p2[i], v.m_point[i] + __FLT_EPSILON__ * 10);
+                }
             }
         }
 };
