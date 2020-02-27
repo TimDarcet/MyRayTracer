@@ -1,2 +1,4 @@
 build/**
-.vscode/**
+.vscode/**build_debug
+build_release
+build_debug
