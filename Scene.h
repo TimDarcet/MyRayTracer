@@ -32,6 +32,14 @@ class Scene {
             std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
             std::uniform_real_distribution<> dis(0.0, 1.0);
             for (int i = 0; i < im.m_width; i++) {
+                // Progress bar
+                int progress = round(50.0f * (float)(i + 1) / (float)im.m_width);
+                string progressBar = "";
+                for (int i=0; i<progress; i++) {
+                    progressBar += "\u2588";
+                }
+                cout << "Raytracing... [" << progressBar << string(50 - progress, ' ') << "] " << progress * 2 << "%\r" << flush;
+                // cout << "Raytraced " << i+1 << "/" << im.m_width << "\r" << flush;
                 for (int j = 0; j < im.m_height; j++) {
                     im.m_data[j * im.m_width + i] = {0, 0, 0};
                     for (int sample_idx = 0; sample_idx < m_n_samples; sample_idx++) {
@@ -45,56 +53,61 @@ class Scene {
                         vector<float> nearest_intersection = {};
                         Vec3f this_ray_color = {0, 0, 0};
                         for (Mesh const m : m_meshes) {
-                            for (Triangle t : m.m_triangles) {
-                                vector<float> intersection = rij.intersect(t);
-                                if (intersection.size() > 0) {
-                                    if (nearest_intersection.size() == 0 || nearest_intersection[3] > intersection[3]) {
-                                        nearest_intersection = intersection;
-                                        Vec3f normal_at_point = intersection[0] * t.m_vertices[0]->m_normal
-                                                            + intersection[1] * t.m_vertices[1]->m_normal
-                                                            + intersection[2] * t.m_vertices[2]->m_normal;
-                                        normal_at_point.normalize();
-                                        Vec3f intersection_position = intersection[0] * t.m_vertices[0]->m_point
-                                                                    + intersection[1] * t.m_vertices[1]->m_point
-                                                                    + intersection[2] * t.m_vertices[2]->m_point;
-                                        this_ray_color = {0, 0, 0};
-                                        Vec3f color;
-                                        for (LightSource light : this->m_lights) {
-                                            Vec3f random_source;
-                                            switch (light.m_type)
-                                            {
-                                            case L_AMBIENT:
-                                                color = light.m_intensity * light.m_color * dot(normal_at_point, -rij.m_direction);
-                                                color *= m.m_material.diffuse_response();
-                                                break;
-                                            case L_POINT:
-                                                if (is_visible(intersection_position + 2 * __FLT_EPSILON__ * normal_at_point, light.m_position)) {
-                                                    color = light.m_intensity * light.m_color * dot(normal_at_point, -rij.m_direction);
-                                                    color *= m.m_material.evaluateColorResponse(normal_at_point,
-                                                                                                light.m_position - intersection_position,
-                                                                                                -rij.m_direction);
+                            Vec3f entry, exit;
+                            if (true || m.m_aabb.ray_intersection(rij, entry, exit)) {
+                                for (Triangle t : m.m_triangles) {
+                                    vector<float> intersection = rij.intersect(t);
+                                    if (intersection.size() > 0) {
+                                        if (nearest_intersection.size() == 0 || nearest_intersection[3] > intersection[3]) {
+                                            nearest_intersection = intersection;
+                                            Vec3f normal_at_point = intersection[0] * t.m_vertices[0]->m_normal
+                                                                + intersection[1] * t.m_vertices[1]->m_normal
+                                                                + intersection[2] * t.m_vertices[2]->m_normal;
+                                            normal_at_point.normalize();
+                                            Vec3f intersection_position = intersection[0] * t.m_vertices[0]->m_point
+                                                                        + intersection[1] * t.m_vertices[1]->m_point
+                                                                        + intersection[2] * t.m_vertices[2]->m_point;
+                                            this_ray_color = {0, 0, 0};
+                                            Vec3f color;
+                                            for (LightSource light : this->m_lights) {
+                                                Vec3f random_source;
+                                                switch (light.m_type)
+                                                {
+                                                case L_AMBIENT:
+                                                    color = light.m_intensity * light.m_color * max(0.0f, dot(normal_at_point, -rij.m_direction));
+                                                    color *= m.m_material.diffuse_response(intersection_position);
+                                                    break;
+                                                case L_POINT:
+                                                    if (is_visible(intersection_position + 2 * __FLT_EPSILON__ * normal_at_point, light.m_position)) {
+                                                        color = light.m_intensity * light.m_color * max(0.0f, dot(normal_at_point, -rij.m_direction));
+                                                        color *= m.m_material.evaluateColorResponse(normal_at_point,
+                                                                                                    light.m_position - intersection_position,
+                                                                                                    -rij.m_direction,
+                                                                                                    intersection_position);
+                                                    }
+                                                    else {
+                                                        color = {0, 0, 0};
+                                                    }
+                                                    break;
+                                                case L_RECTANGLE:
+                                                    random_source = light.m_position + float(dis(gen)) * light.m_vec1 + float(dis(gen)) * light.m_vec2;
+                                                    if (is_visible(intersection_position + 2 * __FLT_EPSILON__ * normal_at_point, random_source)) {
+                                                        color = light.m_intensity * light.m_color * max(0.0f, dot(normal_at_point, -rij.m_direction));
+                                                        color *= m.m_material.evaluateColorResponse(normal_at_point,
+                                                                                                    random_source - intersection_position,
+                                                                                                    -rij.m_direction,
+                                                                                                    intersection_position);
+                                                    }
+                                                    else {
+                                                        color = {0, 0, 0};
+                                                    }
+                                                    break;
+                                                default:
+                                                    color = {0, 0, 0}; 
+                                                    break;
                                                 }
-                                                else {
-                                                    color = {0, 0, 0};
-                                                }
-                                                break;
-                                            case L_RECTANGLE:
-                                                random_source = light.m_position + float(dis(gen)) * light.m_vec1 + float(dis(gen)) * light.m_vec2;
-                                                if (is_visible(intersection_position + 2 * __FLT_EPSILON__ * normal_at_point, random_source)) {
-                                                    color = light.m_intensity * light.m_color * dot(normal_at_point, -rij.m_direction);
-                                                    color *= m.m_material.evaluateColorResponse(normal_at_point,
-                                                                                                random_source - intersection_position,
-                                                                                                -rij.m_direction);
-                                                }
-                                                else {
-                                                    color = {0, 0, 0};
-                                                }
-                                                break;
-                                            default:
-                                                color = {0, 0, 0}; 
-                                                break;
+                                                this_ray_color += color;
                                             }
-                                            this_ray_color += color;
                                         }
                                     }
                                 }
