@@ -8,6 +8,7 @@
 #include "Triangle.h"
 #include "Material.h"
 #include "AABB.h"
+#include "BVH.h"
 
 using namespace std;
 
@@ -17,12 +18,14 @@ class Mesh {
         vector<Triangle> m_triangles;
         Material m_material;
         AABB m_aabb;
+        BVH m_bvh;
 
         Mesh() {
             m_vertices = vector<Vertex>();
             m_triangles = vector<Triangle>();
             m_material = Material();
             m_aabb = AABB();
+            m_bvh = BVH();
         }
 
         /*
@@ -89,5 +92,14 @@ class Mesh {
                     m_aabb.m_p2[i] = max(m_aabb.m_p2[i], v.m_point[i] + __FLT_EPSILON__ * 10);
                 }
             }
+        }
+
+        void compute_BVH() {
+            this->compute_aabb();
+            this->m_bvh.m_aabb = this->m_aabb;
+            for (Triangle &t: this->m_triangles) {
+                this->m_bvh.m_triangles->push_back(&t);
+            }
+            this->m_bvh.from_triangles(this->m_bvh.m_triangles);
         }
 };

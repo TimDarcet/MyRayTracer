@@ -10,9 +10,9 @@
 #include "Worley.h"
 
 int main(int argc, char **argv) {
-    int width = 150;
-    int height = 225;
-    int n_samples = 9;
+    int width = 50;
+    int height = 75;
+    int n_samples = 1;
     char *output = (char *)"out.ppm";
     // Parse arguments
     for (int i = 1; i < argc - 1; i++) {
@@ -49,6 +49,7 @@ int main(int argc, char **argv) {
     for (Vertex &v : ground.m_vertices) {
         v.m_normal = {1, 0, 0};
     }
+    ground.compute_BVH();
     // ground.compute_normals();
     test_scene.m_meshes.push_back(ground);
     std::cout << "Created ground" << endl;
@@ -62,6 +63,7 @@ int main(int argc, char **argv) {
     test_mesh.m_material.m_albedo = {0.83, 0.68, 0.214}; // Golden color
     test_mesh.m_material.m_F0 = {1.0, 0.71, 0.29};
     test_mesh.m_material.m_noise = Worley(50, {-0.3, -0.5, -0.5}, {0.7, 1, 1});
+    test_mesh.compute_BVH();
     test_scene.m_meshes.push_back(test_mesh);
     std::cout << "Imported model" << endl;
     // Import model 2
@@ -80,6 +82,10 @@ int main(int argc, char **argv) {
     LightSource ambient_light = LightSource({0,0,0}, {1,1,1}, 2, L_AMBIENT);
     test_scene.m_lights.push_back(ambient_light);
     std::cout << "Created light source" << endl;
+    // Check cut axises
+    for (Mesh &m: test_scene.m_meshes) {
+        m.m_bvh.check_cut_axis();
+    }
     // Raytrace
     test_scene.rayTrace(imtest);
     std::cout << "Traced rays" << endl;
