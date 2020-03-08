@@ -39,6 +39,7 @@ class Scene {
                     progressBar += "\u2588";
                 }
                 std::cout << "Raytracing... [" << progressBar << string(50 - progress, ' ') << "] " << progress * 2 << "%\r" << flush;
+                #pragma omp parallel for
                 for (int j = 0; j < im.m_height; j++) {
                     im.m_data[j * im.m_width + i] = {0, 0, 0};
                     for (int sample_idx = 0; sample_idx < m_n_samples; sample_idx++) {
