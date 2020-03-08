@@ -10,9 +10,9 @@
 #include "Worley.h"
 
 int main(int argc, char **argv) {
-    int width = 100;
-    int height = 150;
-    int n_samples = 4;
+    int width = 1000;
+    int height = 1500;
+    int n_samples = 64;
     char *output = (char *)"out.ppm";
     // Parse arguments
     for (int i = 1; i < argc - 1; i++) {
