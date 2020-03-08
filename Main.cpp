@@ -2,6 +2,8 @@
 #include <cstring>
 #include <ctime>
 #include <math.h>
+#include <chrono>
+
 
 #include "Image.h"
 #include "Scene.h"
@@ -10,9 +12,9 @@
 #include "Worley.h"
 
 int main(int argc, char **argv) {
-    int width = 1000;
-    int height = 1500;
-    int n_samples = 64;
+    int width = 2000;
+    int height = 3000;
+    int n_samples = 100;
     char *output = (char *)"out.ppm";
     // Parse arguments
     for (int i = 1; i < argc - 1; i++) {
@@ -88,8 +90,11 @@ int main(int argc, char **argv) {
         m.m_bvh.check_cut_axis();
     }
     // Raytrace
+    auto t1 = std::chrono::high_resolution_clock::now();
     test_scene.rayTrace(imtest);
-    std::cout << "Traced rays" << endl;
+    auto t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>( t2 - t1 ).count();
+    std::cout << endl << "Traced rays in " << duration << "ms" << endl;
     // Write image
     imtest.write(output);
     std::cout << "Wrote to " << output << endl;

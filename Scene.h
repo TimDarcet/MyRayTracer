@@ -25,12 +25,12 @@ class Scene {
             m_lights = vector<LightSource>();
             m_n_samples = 4;
         }
-        //TODO
         void rayTrace(Image &im) {
             // rng from https://en.cppreference.com/w/cpp/numeric/random/uniform_real_distribution
             std::random_device rd;  //Will be used to obtain a seed for the random number engine
             std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
             std::uniform_real_distribution<> dis(0.0, 1.0);
+            #pragma omp parallel for
             for (int i = 0; i < im.m_width; i++) {
                 // Progress bar
                 int progress = round(50.0f * (float)(i + 1) / (float)im.m_width);
@@ -42,6 +42,7 @@ class Scene {
                 #pragma omp parallel for
                 for (int j = 0; j < im.m_height; j++) {
                     im.m_data[j * im.m_width + i] = {0, 0, 0};
+                    #pragma omp parallel for
                     for (int sample_idx = 0; sample_idx < m_n_samples; sample_idx++) {
                         // Jittered sampling
                         int d = int(sqrt(float(m_n_samples)));
