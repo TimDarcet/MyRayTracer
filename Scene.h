@@ -39,7 +39,6 @@ class Scene {
                     progressBar += "\u2588";
                 }
                 std::cout << "Raytracing... [" << progressBar << string(50 - progress, ' ') << "] " << progress * 2 << "%\r" << flush;
-                // std::cout << "Raytraced " << i+1 << "/" << im.m_width << "\r" << flush;
                 for (int j = 0; j < im.m_height; j++) {
                     im.m_data[j * im.m_width + i] = {0, 0, 0};
                     for (int sample_idx = 0; sample_idx < m_n_samples; sample_idx++) {
@@ -55,7 +54,6 @@ class Scene {
                         for (Mesh const &m : m_meshes) {
                             m.m_bvh.check_cut_axis();
                             Vec3i t;
-                            cout << "Hold my BVH, I'm goin in" << endl;
                             vector<float> intersection = m.m_bvh.intersection(rij, t, m.m_vertices, m.m_triangles);
                             if (intersection.size() > 0) {
                                 if (nearest_intersection.size() == 0 || nearest_intersection[3] > intersection[3]) {
