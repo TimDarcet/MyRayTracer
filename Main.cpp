@@ -14,7 +14,7 @@
 int main(int argc, char **argv) {
     int width = 2000;
     int height = 3000;
-    int n_samples = 100;
+    int n_samples = 128;
     char *output = (char *)"out.ppm";
     // Parse arguments
     for (int i = 1; i < argc - 1; i++) {
