@@ -16,6 +16,20 @@ class AABB {
             m_p2 = p2;
         }
 
+        // AABB(AABB &other) {
+        //     this->m_p1 = other.m_p1;
+        //     this->m_p2 = other.m_p2;
+        // }
+
+        // AABB &operator=(const AABB &other) {
+        //     if (this != &other) {  // protect against invalid self-assignment
+        //         this->m_p1 = other.m_p1;
+        //         this->m_p2 = other.m_p2;
+        //     }
+        //     // by convention, always return *this
+        //     return *this;
+        // }
+
         bool inside(Vec3f v) const {
             for (int i = 0; i < 3; i++)
                 if (m_p1[i] - __FLT_EPSILON__ * 10 > v[i] || m_p2[i] + __FLT_EPSILON__ * 10 < v[i]) {
@@ -24,7 +38,7 @@ class AABB {
             return true;
         }
 
-        bool ray_intersection(Ray r, Vec3f &entry, Vec3f &exit) const {
+        bool ray_intersection(const Ray &r, Vec3f &entry, Vec3f &exit) const {
             // Check if the ray start is inside the box
             // If yes, we know for sure there is an intersection
             // And we can skip the whole intersection and entry point calc step

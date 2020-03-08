@@ -15,18 +15,37 @@ using namespace std;
 class Mesh {
     public:
         vector<Vertex> m_vertices;
-        vector<Triangle> m_triangles;
+        vector<Vec3i> m_triangles;
         Material m_material;
         AABB m_aabb;
         BVH m_bvh;
 
         Mesh() {
             m_vertices = vector<Vertex>();
-            m_triangles = vector<Triangle>();
+            m_triangles = vector<Vec3i>();
             m_material = Material();
             m_aabb = AABB();
             m_bvh = BVH();
         }
+
+        // Mesh(Mesh &other) {
+        //     m_vertices = other.m_vertices;
+        //     m_triangles = other.m_triangles;
+        //     m_material = other.m_material;
+        //     m_aabb = other.m_aabb;
+        //     m_bvh = other.m_bvh;
+        // }
+
+        // Mesh &operator=(const Mesh &other) {
+        //     if (this != &other){
+        //         m_vertices = other.m_vertices;
+        //         m_triangles = other.m_triangles;
+        //         m_material = other.m_material;
+        //         m_aabb = other.m_aabb;
+        //         m_bvh = other.m_bvh;
+        //     }
+        //     return *this;
+        // }
 
         /*
         * Deletes all geometry in mesh and replaces it with the off file
@@ -61,35 +80,34 @@ class Mesh {
                 }
                 int a, b, c;
                 offstream >> a >> b >> c;
-                m_triangles.push_back(Triangle(&m_vertices[a], &m_vertices[b], &m_vertices[c]));
+                m_triangles.push_back({a, b, c});
             }
             offstream.close();
             compute_normals();
         }
 
         void compute_normals() {
-            for (Vertex v : m_vertices) {
+            for (Vertex &v : m_vertices) {
                 v.m_normal = {0,0,0};
             }
-            for (Triangle t : m_triangles) {
-                Vec3f n = t.normal();
-                Vertex *v0 = t.m_vertices[0];
-                Vertex *v1 = t.m_vertices[1];
-                Vertex *v2 = t.m_vertices[2];
-                v0->m_normal += n;
-                v1->m_normal += n;
-                v2->m_normal += n;
+            for (Vec3i &t : m_triangles) {
+                Vec3f n = this->normal_at_triangle(t);
+                m_vertices[t[0]].m_normal += n;
+                m_vertices[t[1]].m_normal += n;
+                m_vertices[t[2]].m_normal += n;
             }
-            for (Vertex v : m_vertices) {
+            for (Vertex &v : m_vertices) {
                 v.m_normal.normalize();
             }
         }
 
         void compute_aabb() {
-            for (Vertex v: m_vertices) {
+            m_aabb.m_p1 = m_vertices[0].m_point - __FLT_EPSILON__ * 2 * Vec3f(1, 1, 1);
+            m_aabb.m_p2 = m_vertices[0].m_point + __FLT_EPSILON__ * 2 * Vec3f(1, 1, 1);
+            for (const Vertex &v: m_vertices) {
                 for (int i=0; i<3; i++) {
-                    m_aabb.m_p1[i] = min(m_aabb.m_p1[i], v.m_point[i] - __FLT_EPSILON__ * 10);
-                    m_aabb.m_p2[i] = max(m_aabb.m_p2[i], v.m_point[i] + __FLT_EPSILON__ * 10);
+                    m_aabb.m_p1[i] = min(m_aabb.m_p1[i], v.m_point[i] - __FLT_EPSILON__ * 2);
+                    m_aabb.m_p2[i] = max(m_aabb.m_p2[i], v.m_point[i] + __FLT_EPSILON__ * 2);
                 }
             }
         }
@@ -97,9 +115,24 @@ class Mesh {
         void compute_BVH() {
             this->compute_aabb();
             this->m_bvh.m_aabb = this->m_aabb;
-            for (Triangle &t: this->m_triangles) {
-                this->m_bvh.m_triangles->push_back(&t);
-            }
-            this->m_bvh.from_triangles(this->m_bvh.m_triangles);
+            for (int t_idx=0; t_idx<m_triangles.size(); t_idx++)
+                m_bvh.m_triangles.push_back(t_idx);
+            this->m_bvh.from_triangles(m_bvh.m_triangles.begin(), m_bvh.m_triangles.end(), m_vertices, m_triangles);
+        }
+
+        Vec3f normal_at_triangle(Vec3i &t) {
+            Vec3f p0 = m_vertices[t[0]].m_point;
+            Vec3f p1 = m_vertices[t[1]].m_point;
+            Vec3f p2 = m_vertices[t[2]].m_point;
+            Vec3f n = cross(p1 - p0, p2 - p0);
+            n.normalize();
+            return n;
+        }
+
+        float area_at_triangle(Vec3i &t) {
+            Vec3f p0 = m_vertices[t[0]].m_point;
+            Vec3f p1 = m_vertices[t[1]].m_point;
+            Vec3f p2 = m_vertices[t[2]].m_point;
+            return cross(p1 - p0, p2 - p0).length() / 2.0f;
         }
 };

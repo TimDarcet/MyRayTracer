@@ -25,7 +25,7 @@ class Scene {
             m_lights = vector<LightSource>();
             m_n_samples = 4;
         }
-
+        //TODO
         void rayTrace(Image &im) {
             // rng from https://en.cppreference.com/w/cpp/numeric/random/uniform_real_distribution
             std::random_device rd;  //Will be used to obtain a seed for the random number engine
@@ -52,20 +52,21 @@ class Scene {
                         Ray rij = m_cam.launch_ray(x, y);
                         vector<float> nearest_intersection = {};
                         Vec3f this_ray_color = {0, 0, 0};
-                        for (Mesh const m : m_meshes) {
+                        for (Mesh const &m : m_meshes) {
                             m.m_bvh.check_cut_axis();
-                            Triangle t = Triangle(NULL, NULL, NULL);
-                            vector<float> intersection = m.m_bvh.intersection(rij, t);
+                            Vec3i t;
+                            cout << "Hold my BVH, I'm goin in" << endl;
+                            vector<float> intersection = m.m_bvh.intersection(rij, t, m.m_vertices, m.m_triangles);
                             if (intersection.size() > 0) {
                                 if (nearest_intersection.size() == 0 || nearest_intersection[3] > intersection[3]) {
                                     nearest_intersection = intersection;
-                                    Vec3f normal_at_point = intersection[0] * t.m_vertices[0]->m_normal
-                                                          + intersection[1] * t.m_vertices[1]->m_normal
-                                                          + intersection[2] * t.m_vertices[2]->m_normal;
+                                    Vec3f normal_at_point = intersection[0] * m.m_vertices[t[0]].m_normal
+                                                          + intersection[1] * m.m_vertices[t[1]].m_normal
+                                                          + intersection[2] * m.m_vertices[t[2]].m_normal;
                                     normal_at_point.normalize();
-                                    Vec3f intersection_position = intersection[0] * t.m_vertices[0]->m_point
-                                                                + intersection[1] * t.m_vertices[1]->m_point
-                                                                + intersection[2] * t.m_vertices[2]->m_point;
+                                    Vec3f intersection_position = intersection[0] * m.m_vertices[t[0]].m_point
+                                                                + intersection[1] * m.m_vertices[t[1]].m_point
+                                                                + intersection[2] * m.m_vertices[t[2]].m_point;
                                     this_ray_color = {0, 0, 0};
                                     Vec3f color;
                                     for (LightSource light : this->m_lights) {
@@ -77,7 +78,7 @@ class Scene {
                                             color *= m.m_material.diffuse_response(intersection_position);
                                             break;
                                         case L_POINT:
-                                            if (is_visible(intersection_position + 2 * __FLT_EPSILON__ * t.normal(), light.m_position)) {
+                                            if (is_visible(intersection_position + 2 * __FLT_EPSILON__ * normal_at_point, light.m_position)) {
                                                 color = light.m_intensity * light.m_color * max(0.0f, dot(normal_at_point, -rij.m_direction));
                                                 color *= m.m_material.evaluateColorResponse(normal_at_point,
                                                                                             light.m_position - intersection_position,
@@ -90,7 +91,7 @@ class Scene {
                                             break;
                                         case L_RECTANGLE:
                                             random_source = light.m_position + float(dis(gen)) * light.m_vec1 + float(dis(gen)) * light.m_vec2;
-                                            if (is_visible(intersection_position + 2 * __FLT_EPSILON__ * t.normal(), random_source)) {
+                                            if (is_visible(intersection_position + 2 * __FLT_EPSILON__ * normal_at_point, random_source)) {
                                                 color = light.m_intensity * light.m_color * max(0.0f, dot(normal_at_point, -rij.m_direction));
                                                 color *= m.m_material.evaluateColorResponse(normal_at_point,
                                                                                             random_source - intersection_position,
@@ -110,6 +111,8 @@ class Scene {
                                 }
                             }
                         }
+                        // if (this_ray_color.squaredLength() == 0)
+                        //     this_ray_color = {0, 0, 1};
                         im.m_data[j * im.m_width + i] += this_ray_color;
                     }
                     im.m_data[j * im.m_width + i] *= 1 / float(m_n_samples);
@@ -123,14 +126,13 @@ class Scene {
          */
         bool is_visible(Vec3f v, Vec3f ls) {
             Ray rvl = Ray(v, normalize(ls - v));
-            for (Mesh const m : this->m_meshes) {
-                for (Triangle t : m.m_triangles) {
-                    vector<float> intersection = rvl.intersect(t);
-                    if (intersection.size() > 0) {
-                        float t = intersection[3];
-                        if (t <= (ls - v).length())
-                            return false;
-                    }
+            for (Mesh const &m : this->m_meshes) {
+                Vec3i t;
+                vector<float> intersection = m.m_bvh.intersection(rvl, t, m.m_vertices, m.m_triangles);
+                if (intersection.size() > 0) {
+                    float t = intersection[3];
+                    if (t <= (ls - v).length())
+                        return false;
                 }
             }
             return true;

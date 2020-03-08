@@ -10,8 +10,8 @@
 #include "Worley.h"
 
 int main(int argc, char **argv) {
-    int width = 50;
-    int height = 75;
+    int width = 100;
+    int height = 150;
     int n_samples = 1;
     char *output = (char *)"out.ppm";
     // Parse arguments
@@ -35,36 +35,37 @@ int main(int argc, char **argv) {
     test_scene.m_cam = Camera({0, 0, 3}, {0, -M_PI/2, 0}, M_PI/4, 0.6666f);
     std::cout << "Created scene" << endl;
     // Create ground
-    Mesh ground;
+    // Mesh ground;
+    test_scene.m_meshes.emplace_back();
     Vertex v0 = {-0.3, -3, -3};
     Vertex v1 = {-0.3, -3, 3};
     Vertex v2 = {-0.3, 3, -3};
     Vertex v3 = {-0.3, 3, 3};
-    ground.m_vertices.push_back(v0);
-    ground.m_vertices.push_back(v1);
-    ground.m_vertices.push_back(v2);
-    ground.m_vertices.push_back(v3);
-    ground.m_triangles.push_back(Triangle(&ground.m_vertices[1], &ground.m_vertices[0], &ground.m_vertices[2]));
-    ground.m_triangles.push_back(Triangle(&ground.m_vertices[1], &ground.m_vertices[2], &ground.m_vertices[3]));
-    for (Vertex &v : ground.m_vertices) {
+    test_scene.m_meshes.back().m_vertices.push_back(v0);
+    test_scene.m_meshes.back().m_vertices.push_back(v1);
+    test_scene.m_meshes.back().m_vertices.push_back(v2);
+    test_scene.m_meshes.back().m_vertices.push_back(v3);
+    test_scene.m_meshes.back().m_triangles.push_back({1, 0, 2});
+    test_scene.m_meshes.back().m_triangles.push_back({1, 2, 3});
+    for (Vertex &v : test_scene.m_meshes.back().m_vertices) {
         v.m_normal = {1, 0, 0};
     }
-    ground.compute_BVH();
+    test_scene.m_meshes.back().compute_BVH();
     // ground.compute_normals();
-    test_scene.m_meshes.push_back(ground);
+    // test_scene.m_meshes.push_back(ground);
     std::cout << "Created ground" << endl;
     // Import model
-    Mesh test_mesh;
-    test_mesh.loadOFF("../example.off");
+    test_scene.m_meshes.emplace_back();
+    // Mesh test_mesh;
+    test_scene.m_meshes.back().loadOFF("../example.off");
     Transform t({0,0,0}, {1.5, 3, 3}, 1);
-    t.apply_transform(test_mesh);
-    test_mesh.compute_normals();
-    test_mesh.m_material.m_type = M_MICROFACETS;
-    test_mesh.m_material.m_albedo = {0.83, 0.68, 0.214}; // Golden color
-    test_mesh.m_material.m_F0 = {1.0, 0.71, 0.29};
-    test_mesh.m_material.m_noise = Worley(50, {-0.3, -0.5, -0.5}, {0.7, 1, 1});
-    test_mesh.compute_BVH();
-    test_scene.m_meshes.push_back(test_mesh);
+    t.apply_transform(test_scene.m_meshes.back());
+    test_scene.m_meshes.back().compute_normals();
+    test_scene.m_meshes.back().m_material.m_type = M_MICROFACETS;
+    test_scene.m_meshes.back().m_material.m_albedo = {0.83, 0.68, 0.214}; // Golden color
+    test_scene.m_meshes.back().m_material.m_F0 = {1.0, 0.71, 0.29};
+    test_scene.m_meshes.back().m_material.m_noise = Worley(50, {-0.3, -0.5, -0.5}, {0.7, 1, 1});
+    test_scene.m_meshes.back().compute_BVH();
     std::cout << "Imported model" << endl;
     // Import model 2
     // Mesh test_mesh_2;
