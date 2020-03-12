@@ -12,9 +12,9 @@
 #include "Worley.h"
 
 int main(int argc, char **argv) {
-    int width = 2000;
-    int height = 3000;
-    int n_samples = 128;
+    int width = 300;
+    int height = 450;
+    int n_samples = 32;
     char *output = (char *)"out.ppm";
     // Parse arguments
     for (int i = 1; i < argc - 1; i++) {
@@ -22,6 +22,8 @@ int main(int argc, char **argv) {
             width = atoi(argv[i + 1]);
         else if (!strcmp(argv[i], "-height"))
             height = atoi(argv[i + 1]);
+        else if (!strcmp(argv[i], "-nsamples"))
+            n_samples = atoi(argv[i + 1]);
         else if (!strcmp(argv[i], "-output"))
             output = (char *)argv[i + 1];
     }
@@ -58,9 +60,8 @@ int main(int argc, char **argv) {
     std::cout << "Created ground" << endl;
     // Import model
     test_scene.m_meshes.emplace_back();
-    // Mesh test_mesh;
     test_scene.m_meshes.back().loadOFF("../example.off");
-    Transform t({0,0,0}, {1.5, 3, 3}, 1);
+    Transform t({0,0,0}, {1.5, 3.5, 3}, 1);
     t.apply_transform(test_scene.m_meshes.back());
     test_scene.m_meshes.back().compute_normals();
     test_scene.m_meshes.back().m_material.m_type = M_MICROFACETS;
@@ -70,17 +71,17 @@ int main(int argc, char **argv) {
     test_scene.m_meshes.back().compute_BVH();
     std::cout << "Imported model" << endl;
     // Import model 2
-    // Mesh test_mesh_2;
-    // test_mesh_2.loadOFF("../tetra.off");
+    // test_scene.m_meshes.emplace_back();
+    // test_scene.m_meshes.back().loadOFF("../tetra.off");
     // Transform t_2({0,0,0}, {1, 1, 1}, 0.2);
-    // t_2.apply_transform(test_mesh_2);
-    // test_mesh_2.compute_normals();
-    // test_mesh_2.m_material.m_type = M_MICROFACETS;
-    // test_mesh_2.m_material.m_noise = Worley(50, {-0.3, -0.5, -0.5}, {0.7, 1, 1});
-    // test_scene.m_meshes.push_back(test_mesh_2);
+    // t_2.apply_transform(test_scene.m_meshes.back());
+    // test_scene.m_meshes.back().compute_normals();
+    // test_scene.m_meshes.back().m_material.m_type = M_MICROFACETS;
+    // // test_scene.m_meshes.back().m_material.m_noise = Worley(50, {-0.3, -0.5, -0.5}, {0.7, 1, 1});
+    // test_scene.m_meshes.back().compute_BVH();
     // std::cout << "Imported model 2" << endl;
     // Create light
-    LightSource point_light = LightSource({1,2,2}, {1.0,1.0,1.0}, 4, L_RECTANGLE);
+    LightSource point_light = LightSource({1,-0.5,2}, {1.0,1.0,1.0}, 4, L_RECTANGLE, {0.5, 0, 0}, {0, 0.5, 0});
     test_scene.m_lights.push_back(point_light);
     LightSource ambient_light = LightSource({0,0,0}, {1,1,1}, 2, L_AMBIENT);
     test_scene.m_lights.push_back(ambient_light);
