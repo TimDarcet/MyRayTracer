@@ -41,29 +41,26 @@ class Material {
         Vec3f get_albedo(Vec3f pos) const {
             // Color albedo;
             // albedo.from_hsv({m_noise.sample(pos, 1) * 360.0f, 0.5, 0.5});
-            // return albedo.m_rgb;5
-            // return {0, 0, 0};
-            // return m_albedo * (1 + 0.0 * (m_noise.sample(pos, 1) - 1) / 2);
+            // return albedo.m_rgb;
             return m_albedo;
         }
 
         float get_shininess(Vec3f pos) const {
-            // return m_shininess * (1 + 0.0 * (m_noise.sample(pos, 2) - 1) / 2);
+            // return m_shininess * (1 + 0.2 * (m_noise.sample(pos, 2) - 1) / 2);
             return m_shininess;
         }
 
         float get_alpha(Vec3f pos) const {
-            // return m_alpha * (1 + 0.0 * (m_noise.sample(pos, 1) - 1) / 2);
+            // return m_alpha * (1 + 0.2 * (m_noise.sample(pos, 1) - 1) / 2);
             return m_alpha;
         }
 
         Vec3f get_F0(Vec3f pos) const {
-            // return m_F0 * (1 + 0.0 * (m_noise.sample(pos, 2) - 1) / 2);
+            // return m_F0 * (1 + 0.2 * (m_noise.sample(pos, 2) - 1) / 2);
             return m_F0;
         }
 
         Vec3f evaluateColorResponse(const Vec3f normal, const Vec3f wi, const Vec3f wo, Vec3f pos) const {
-            // float n = m_noise.sample(pos, 1) * 2;
             return m_diffuse_coef * diffuse_response(pos) + (1 - m_diffuse_coef) * specular_response(normalize(normal), normalize(wi), normalize(wo), pos);
         }
 

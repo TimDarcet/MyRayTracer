@@ -155,11 +155,9 @@ class BVH {
                 );
                 assert(0 <= this->m_cut_axis && this->m_cut_axis <= 2);
             }
-            this->check_cut_axis();
         }
 
         vector<float> intersection(Ray &r, Vec3i &t, const vector<Vertex> &vertices, const vector<Vec3i> &triangles) const {
-            this->check_cut_axis();
             Vec3f entry;
             Vec3f exit;
             if (this->m_aabb.ray_intersection(r, entry, exit)) {
@@ -175,7 +173,6 @@ class BVH {
                             t = triangles[t_idx];
                         }
                     }
-                    this->check_cut_axis();
                     return best_inter;
                 }
                 else {
