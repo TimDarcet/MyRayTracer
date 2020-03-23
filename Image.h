@@ -4,6 +4,7 @@
 #include<fstream>
 #include<iostream>
 #include "Vec3.h"
+#include "PNG.h"
 
 using namespace std;
 
@@ -54,5 +55,32 @@ class Image {
                                                    (1 - t) * color1[2] + t * color2[2]};
                     }
                 }
+        }
+
+        // The image should be a normal map
+        // Style the image according to the lit sphere in file fname
+        void litSphere(const char *fname) {
+            PNG_handler pngr = PNG_handler();
+            pngr.read_png_file(fname);
+            for (int y = 0; y < m_height; y++) {
+                for (int x = 0; x < m_width; x++) {
+                    Vec3f normal = m_data.at(y * m_width + x);
+                    if (normal[2] <= __FLT_EPSILON__)
+                        m_data[y * m_width + x] = {0, 0, 0};
+                    else {
+                        float abs_norm = 0.5f + normal[0] / 2.0f;
+                        float ord_norm = 0.5f + normal[1] / 2.0f;
+                        // float abs_norm = float(x) / float(m_width);
+                        // float ord_norm = float(y) / float(m_height);
+                        int abs = (int)floor(abs_norm * pngr.width);
+                        int ord = (int)floor(ord_norm * pngr.height);
+                        // cout << abs << " " << ord << endl;
+                        png_byte *src_pxl = &pngr.row_pointers[ord][abs * 4]; // *4 because of the number of channels
+                        // printf("%4d, %4d = RGBA(%3d, %3d, %3d, %3d)\n", x, y, src_pxl[0], src_pxl[1], src_pxl[2], src_pxl[3]);
+                        m_data[y * m_width + x] = {float((int)src_pxl[0]) / 255.0f, float((int)src_pxl[1]) / 255.0f, float((int)src_pxl[2]) / 255.0f};
+                        // cout << m_data[y * m_width + x] << endl;
+                    }
+                }
+            }
         }
 };

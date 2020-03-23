@@ -12,9 +12,9 @@
 #include "Worley.h"
 
 int main(int argc, char **argv) {
-    int width = 200;
-    int height = 300;
-    int n_samples = 16;
+    int width = 1000;
+    int height = 1500;
+    int n_samples = 1;
     char *output = (char *)"out.ppm";
     // Parse arguments
     for (int i = 1; i < argc - 1; i++) {
@@ -114,6 +114,9 @@ int main(int argc, char **argv) {
     auto t2 = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>( t2 - t1 ).count();
     std::cout << endl << "Traced rays in " << duration << "ms" << endl;
+    // Shade image
+    imtest.litSphere("../resources/orange_sphere.png");
+    cout << "Shaded the image" << endl;
     // Write image
     imtest.write(output);
     std::cout << "Wrote to " << output << endl;

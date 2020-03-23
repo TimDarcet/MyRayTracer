@@ -27,6 +27,16 @@ class Camera {
             return r;
         }
 
+        Vec3<Vec3f> reference_frame() {
+            Vec3f v1 = {1, 0, 0};
+            Vec3f v2 = {0, 1, 0};
+            Vec3f v3 = {0, 0, 1};
+            m_orientation.apply_rotations(v1);            
+            m_orientation.apply_rotations(v2);            
+            m_orientation.apply_rotations(v3);
+            return {v1, v2, v3};
+        }
+
         /*
          * x and y are floats between 0 and 1 representing coordinates in the image
          */

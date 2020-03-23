@@ -77,20 +77,8 @@ class Scene {
                         float x = (float(i) + noise[0]) / float(im.m_width);
                         float y = (float(j) + noise[1]) / float(im.m_height);
                         Ray rij = m_cam.launch_ray(x, y);
-                        Vec3f this_ray_color = {0, 0, 0};
-                        vector<float> nearest_intersection = {};
-                        // for (Mesh const &m : m_meshes) {
-                        //     Vec3i t;
-                        //     vector<float> intersection = m.m_bvh.intersection(rij, t, m.m_vertices, m.m_triangles);
-                        //     if (intersection.size() > 0) {
-                        //         if (nearest_intersection.size() == 0 || nearest_intersection[3] > intersection[3]) {
-                        //             nearest_intersection = intersection;
-                        //             this_ray_color = this->colorize(intersection, t, m, rij.m_direction);
-                        //         }
-                        //     }
-                        // }
-                        // im.m_data[j * im.m_width + i] += this_ray_color;
-                        im.m_data[j * im.m_width + i] += recurse_ray(rij, 0);
+                        // im.m_data[j * im.m_width + i] += recurse_ray(rij, 0);
+                        im.m_data[j * im.m_width + i] += ray_normal_only(rij);
                     }
                     im.m_data[j * im.m_width + i] *= 1 / float(m_n_samples);
                 }
@@ -207,6 +195,41 @@ class Scene {
                                                                                    -r.m_direction,
                                                                                    intersection_position);
                 return this_ray_color + recursed_color;
+            }
+            else {
+                return {0, 0, 0};
+            }
+        }
+
+        Vec3f ray_normal_only(Ray r) {
+            Vec3f this_ray_color = {0, 0, 0};
+            vector<float> nearest_intersection = {};
+            Vec3i nearest_t;
+            const Mesh *nearest_m;
+            int mesh_id = 0;
+            int nearest_id = -1;
+            for (Mesh const &m : m_meshes) {
+                Vec3i t;
+                vector<float> intersection = m.m_bvh.intersection(r, t, m.m_vertices, m.m_triangles);
+                if (intersection.size() > 0) {
+                    if (nearest_intersection.size() == 0 || nearest_intersection[3] > intersection[3]) {
+                        nearest_intersection = intersection;
+                        nearest_t = t;
+                        nearest_id = mesh_id;
+                        nearest_m = &m;
+                    }
+                }
+                mesh_id++;
+            }
+            if (nearest_intersection.size() > 0) {
+                Vec3f normal_at_point = nearest_intersection[0] * nearest_m->m_vertices[nearest_t[0]].m_normal
+                                      + nearest_intersection[1] * nearest_m->m_vertices[nearest_t[1]].m_normal
+                                      + nearest_intersection[2] * nearest_m->m_vertices[nearest_t[2]].m_normal;
+                normal_at_point.normalize();
+
+                return {dot(-m_cam.reference_frame()[1], normal_at_point),
+                        dot(-m_cam.reference_frame()[2], normal_at_point),
+                        float(nearest_id)};
             }
             else {
                 return {0, 0, 0};
