@@ -85,21 +85,21 @@ int main(int argc, char **argv) {
     // test_scene.m_meshes.back().compute_BVH();
     // std::cout << "Imported model 2" << endl;
     // Import model 3
-    test_scene.m_meshes.emplace_back();
-    test_scene.m_meshes.back().loadOFF("../example.off");
-    Transform t_3({1.5,0,-0.4}, {1, 1, 1}, 0.4);
-    t_3.apply_transform(test_scene.m_meshes.back());
-    test_scene.m_meshes.back().compute_normals();
-    test_scene.m_meshes.back().m_material.m_type = M_MICROFACETS;
-    test_scene.m_meshes.back().m_material.m_albedo = {0.214, 0.68, 0.83}; // Golden color
-    test_scene.m_meshes.back().m_material.m_F0 = {0.29, 0.71, 1.0};
-    // test_scene.m_meshes.back().m_material.m_type = M_BLINN_PHONG;
-    // test_scene.m_meshes.back().m_material.m_albedo = {1, 1, 1};
-    // test_scene.m_meshes.back().m_material.m_diffuse_coef = 0;
-    // test_scene.m_meshes.back().m_material.m_shininess = 32;
-    test_scene.m_meshes.back().m_material.m_noise = Worley(50, {-0.3, -0.5, -0.5}, {0.7, 1, 1});
-    test_scene.m_meshes.back().compute_BVH();
-    std::cout << "Imported model 3" << endl;
+    // test_scene.m_meshes.emplace_back();
+    // test_scene.m_meshes.back().loadOFF("../example.off");
+    // Transform t_3({1.5,0,-0.4}, {1, 1, 1}, 0.4);
+    // t_3.apply_transform(test_scene.m_meshes.back());
+    // test_scene.m_meshes.back().compute_normals();
+    // test_scene.m_meshes.back().m_material.m_type = M_MICROFACETS;
+    // test_scene.m_meshes.back().m_material.m_albedo = {0.214, 0.68, 0.83}; // Golden color
+    // test_scene.m_meshes.back().m_material.m_F0 = {0.29, 0.71, 1.0};
+    // // test_scene.m_meshes.back().m_material.m_type = M_BLINN_PHONG;
+    // // test_scene.m_meshes.back().m_material.m_albedo = {1, 1, 1};
+    // // test_scene.m_meshes.back().m_material.m_diffuse_coef = 0;
+    // // test_scene.m_meshes.back().m_material.m_shininess = 32;
+    // test_scene.m_meshes.back().m_material.m_noise = Worley(50, {-0.3, -0.5, -0.5}, {0.7, 1, 1});
+    // test_scene.m_meshes.back().compute_BVH();
+    // std::cout << "Imported model 3" << endl;
     // Create light
     LightSource rect_light = LightSource({1,-0.5,2}, {1.0,1.0,1.0}, 4, L_RECTANGLE, {0.2, 0, 0}, {0, 0.2, 0});
     test_scene.m_lights.push_back(rect_light);
@@ -115,7 +115,10 @@ int main(int argc, char **argv) {
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>( t2 - t1 ).count();
     std::cout << endl << "Traced rays in " << duration << "ms" << endl;
     // Shade image
-    imtest.litSphere("../resources/orange_sphere.png");
+    imtest.styleBlitTree("../resources/blue_scales.png", 0.05);
+    // imtest.styleBlitTreeCoords();
+    // imtest.linearBlur(2);
+    // imtest.transferFrom();
     cout << "Shaded the image" << endl;
     // Write image
     imtest.write(output);

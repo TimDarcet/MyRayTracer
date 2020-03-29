@@ -75,7 +75,7 @@ class Material {
                     return this->get_albedo(pos) * evaluateBlinnPhong(normal, wi, wo, pos);
                     break;
                 case M_MICROFACETS:
-                    return evaluateMicrofacets(normal, wi, wo, pos); // TODO: should I put the albedo as a factor here or not?
+                    return evaluateMicrofacets(normal, wi, wo, pos);
                     break;
                 default:
                     return {0, 0, 0};

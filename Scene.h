@@ -73,7 +73,8 @@ class Scene {
                     im.m_data[j * im.m_width + i] = {0, 0, 0};
                     #pragma omp parallel for
                     for (int sample_idx = 0; sample_idx < m_n_samples; sample_idx++) {
-                        Vec3f noise = jit_sample(sample_idx, m_n_samples);
+                        // Vec3f noise = jit_sample(sample_idx, m_n_samples);
+                        Vec3f noise = {0.5, 0.5, 0}; // Remove the noise since we are taking only one sample
                         float x = (float(i) + noise[0]) / float(im.m_width);
                         float y = (float(j) + noise[1]) / float(im.m_height);
                         Ray rij = m_cam.launch_ray(x, y);
@@ -229,7 +230,7 @@ class Scene {
 
                 return {dot(-m_cam.reference_frame()[1], normal_at_point),
                         dot(-m_cam.reference_frame()[2], normal_at_point),
-                        float(nearest_id)};
+                        float(nearest_id)}; // We do not need the third channel to know where we are on the picture, so we use it to know which mesh we are on
             }
             else {
                 return {0, 0, 0};
