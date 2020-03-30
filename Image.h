@@ -148,9 +148,7 @@ class Image {
                             float ord_norm = 0.5f + normal[1] / 2.0f;
                             int abs = (int)floor(abs_norm * pngr.width);
                             int ord = (int)floor(ord_norm * pngr.height);
-                            #pragma omp parallel for
                             for (int y_src = 0; y_src < pngr.height; y_src++) {
-                                #pragma omp parallel for
                                 for (int x_src = 0; x_src < pngr.width; x_src++) {
                                     int x_new = x + x_src - abs;
                                     int y_new = y + y_src - ord;
@@ -164,10 +162,8 @@ class Image {
                                                                         new_normal[1],
                                                                         src_normal[0],
                                                                         src_normal[1]);
-                                        // cout << error << endl;
                                         if (error < threshold) {
                                             png_byte *src_pxl = &pngr.row_pointers[y_src][x_src * 4]; // *4 because of the number of channels
-                                            // printf("%4d, %4d = RGBA(%3d, %3d, %3d, %3d)\n", x, y, src_pxl[0], src_pxl[1], src_pxl[2], src_pxl[3]);
                                             m_data[y_new * m_width + x_new] = {float((int)src_pxl[0]) / 255.0f,
                                                                                float((int)src_pxl[1]) / 255.0f,
                                                                                float((int)src_pxl[2]) / 255.0f};
@@ -203,8 +199,6 @@ class Image {
                 #pragma omp parallel for
                 for (int x = 0; x < m_width; x++) {
                     Vec3f normal = guides[y * m_width + x];
-                    //     this->m_data[y * m_width + x] = {0, 0, 0};
-                    // else {
                     if (normal[2] > __FLT_EPSILON__) {
                         Vec3f pos_01 = {float(x) / float(m_width), float(y) / float(m_height), 0};
                         function<bool(Vec3f)> test = [this, &guides](Vec3f s){return abs(guides[round(floor(s[1] * m_height) * m_width + floor(s[0] * m_width))][2] - 1) < __FLT_EPSILON__;};
@@ -213,13 +207,12 @@ class Image {
                         for (Vec3f s: ns) {
                             Vec3f target_seed_normal = guides[round(floor(s[1] * m_height) * m_width + floor(s[0] * m_width))];
                             Vec3f src_seed_01 = (target_seed_normal + Vec3f(1.0f, 1.0f, 0)) / 2.0f;
-                            Vec3f predicted_src_01 = src_seed_01 + (pos_01 - s) / (ball_scale * pow(0.8, depth));
+                            Vec3f predicted_src_01 = src_seed_01 + (pos_01 - s) / (ball_scale * pow(0.9, depth));
                             Vec3f predicted_normal = {2.0f * float(predicted_src_01[0]) - 1.0f,
                                                       2.0f * float(predicted_src_01[1]) - 1.0f, 0};
                             float error = projectedDistance(normal, predicted_normal);
-                            // cout << target_seed_normal << " | " << normal << " | " << s << " | " << pos_01 << " | " << src_seed_01 << " | " << predicted_normal << " | " << error << endl;
                             if (!isnan(error) && abs(target_seed_normal[2] - 1) < __FLT_EPSILON__) {
-                                float coef = 1.0f / (1 + exp(1000 * (error - threshold)));
+                                float coef = 1.0f / (1 + exp(200 * (error - threshold)));
                                 Vec3i predicted_src = {int(predicted_src_01[0] * pngr.width), int(predicted_src_01[1] * pngr.height), 0};
                                 png_byte *src_pxl = &pngr.row_pointers[predicted_src[1]][predicted_src[0] * 4]; // *4 because of the number of channels
                                 this->m_data[y * m_width + x] += coef * (1 - coefs[y * m_width + x]) * Vec3f(float((int)src_pxl[0]) / 255.0f,

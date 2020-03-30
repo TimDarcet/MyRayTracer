@@ -115,10 +115,11 @@ int main(int argc, char **argv) {
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>( t2 - t1 ).count();
     std::cout << endl << "Traced rays in " << duration << "ms" << endl;
     // Shade image
-    imtest.styleBlitTree("../resources/blue_scales.png", 0.05);
+    imtest.styleBlitTree("../resources/brown_coarse.png", 0.005);
     // imtest.styleBlitTreeCoords();
     // imtest.linearBlur(2);
     // imtest.transferFrom();
+    // imtest.litSphere("../resources/blue_scales.png");
     cout << "Shaded the image" << endl;
     // Write image
     imtest.write(output);
