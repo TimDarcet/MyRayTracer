@@ -209,16 +209,17 @@ class Image {
                         Vec3f pos_01 = {float(x) / float(m_width), float(y) / float(m_height), 0};
                         function<bool(Vec3f)> test = [this, &guides](Vec3f s){return abs(guides[round(floor(s[1] * m_height) * m_width + floor(s[0] * m_width))][2] - 1) < __FLT_EPSILON__;};
                         vector<Vec3f> ns = nearestSeeds(pos_01, seeds, test);
+                        int depth = 0;
                         for (Vec3f s: ns) {
                             Vec3f target_seed_normal = guides[round(floor(s[1] * m_height) * m_width + floor(s[0] * m_width))];
                             Vec3f src_seed_01 = (target_seed_normal + Vec3f(1.0f, 1.0f, 0)) / 2.0f;
-                            Vec3f predicted_src_01 = src_seed_01 + (pos_01 - s) / ball_scale;
+                            Vec3f predicted_src_01 = src_seed_01 + (pos_01 - s) / (ball_scale * pow(0.8, depth));
                             Vec3f predicted_normal = {2.0f * float(predicted_src_01[0]) - 1.0f,
                                                       2.0f * float(predicted_src_01[1]) - 1.0f, 0};
                             float error = projectedDistance(normal, predicted_normal);
                             // cout << target_seed_normal << " | " << normal << " | " << s << " | " << pos_01 << " | " << src_seed_01 << " | " << predicted_normal << " | " << error << endl;
                             if (!isnan(error) && abs(target_seed_normal[2] - 1) < __FLT_EPSILON__) {
-                                float coef = 1.0f / (1 + exp(5000 * (error - threshold)));
+                                float coef = 1.0f / (1 + exp(1000 * (error - threshold)));
                                 Vec3i predicted_src = {int(predicted_src_01[0] * pngr.width), int(predicted_src_01[1] * pngr.height), 0};
                                 png_byte *src_pxl = &pngr.row_pointers[predicted_src[1]][predicted_src[0] * 4]; // *4 because of the number of channels
                                 this->m_data[y * m_width + x] += coef * (1 - coefs[y * m_width + x]) * Vec3f(float((int)src_pxl[0]) / 255.0f,
@@ -226,6 +227,7 @@ class Image {
                                                                                                              float((int)src_pxl[2]) / 255.0f);
                                 coefs[y * m_width + x] += coef * (1 - coefs[y * m_width + x]);
                             }
+                            depth++;
                         }
                         m_data[y * m_width + x] /= coefs[y * m_width + x];
                     }
@@ -233,6 +235,10 @@ class Image {
             }
         }
 
+        // The image should be a normal map
+        // Style the image according to the lit sphere, but actually only store the coordinates of the source point to transfer in m_data
+        // Output should be passed through transferFrom afterwards
+        // Uses styleBlit's seeded version
         void styleBlitTreeCoords(float threshold = 0.05, int depth=8, float ball_scale = 0.3) {
             // Copy the guiding channels
             vector<Vec3f> guides = this->m_data;
